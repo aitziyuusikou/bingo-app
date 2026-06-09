@@ -1,26 +1,26 @@
-
-<html>
+<!doctype html>
+<html lang="ja">
     <head>
-        <meta charset="utf-8">
-        
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
         <title>ビンゴ抽選機</title>
-        
+
         <!--CSS-->
-        <link href="style.css" rel="stylesheet" type="text/css">
-        
+        <link href="style.css" rel="stylesheet" type="text/css" />
+
         <!--効果音-->
         <audio src="slot.mp3" id="slot" loop play></audio>
         <audio src="stop.mp3" id="stop" play></audio>
-        
     </head>
-    
+
     <body>
         <!--当選パネル-->
         <div class="panel" id="panel">0</div>
-        
+
         <!--ボタン-->
         <button class="btn" id="btn" onclick="slot()" onkeydown="">SPIN</button>
-        
+
         <!--パネル-->
         <div class="log">
             <ul>
@@ -120,7 +120,7 @@
                 <li class="none">-</li>
             </ul>
         </div>
-        
+
         <!--自作JS-->
         <script type="text/javascript" src="script.js"></script>
     </body>
