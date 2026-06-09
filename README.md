@@ -3,7 +3,7 @@
 学生団体のイベントで使えるシンプルなビンゴ抽選アプリです。  
 1〜75の数字をランダムに1つずつ抽選し、当選済みの番号を画面下部のパネルで管理できます。
 
----
+<img width="3600" height="2078" alt="Image" src="https://github.com/user-attachments/assets/ef8c8e93-f478-4509-8153-549bb22eb507" />
 
 ## 使い方
 
