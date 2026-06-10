@@ -1,0 +1,364 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+bingo/
+  index.html
+  script.js
+  slot.mp3
+  stop.mp3
+  style.css
+README.md
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="bingo/script.js">
+// 設定値の定義
+const MAX_NUM = 75;
+let availableNumbers = []; // まだ出ていない数字を管理する配列
+let isSpinning = false; // スピン中かどうかのフラグ
+let loopTimer; // setInterval保管用
+
+// DOM要素の取得
+const panel = document.getElementById("panel");
+const button = document.getElementById("button");
+const board = document.getElementById("board");
+const soundSlot = document.getElementById("slot");
+const soundStop = document.getElementById("stop");
+
+// ==========================================
+// 初期化関数
+// ==========================================
+
+function init() {
+    // 1. まだ出ていない数字(1〜75)の配列を作成する
+    for (let i = 1; i <= MAX_NUM; i++) {
+        availableNumbers.push(i);
+    }
+
+    // 2. 履歴パネルをJavaScriptで動的に生成する
+    for (let i = 1; i <= MAX_NUM; i++) {
+        const cell = document.createElement("div"); // <div>を作成
+        cell.classList.add("cell"); // class="cell" を付与
+        cell.id = `cell-${i}`; // id="cell-1" などを付与
+        cell.textContent = i; // テキストを挿入
+        board.appendChild(cell); // 画面(board)に追加
+    }
+
+    // 3. ボタンのクリックイベントを登録
+    button.addEventListener("click", handleButtonClick);
+}
+
+// ==========================================
+// ページ離脱防止
+// ==========================================
+
+window.addEventListener("beforeunload", (event) => {
+    // まだ抽選履歴が残っている場合のみ警告アラートが出現
+    if (availableNumbers.length < MAX_NUM) {
+        event.preventDefault();
+
+        // Chrome等で必要
+        event.returnValue = "";
+
+        return "";
+    }
+});
+
+// ==========================================
+// 内部関数
+// ==========================================
+
+// スピン開始処理
+function startSpin() {
+    loopTimer = setInterval(() => {
+        // スピン中のダミー数字を表示（1〜75のランダム）
+        const dummyNum = Math.floor(Math.random() * MAX_NUM) + 1;
+        panel.textContent = dummyNum;
+    }, 50); // 少し間隔を広げる（画面のチラつきを軽減）
+}
+
+// スピン停止処理
+function stopSpin() {
+    clearInterval(loopTimer);
+}
+
+// 抽選処理
+function drawNumber() {
+    // 残っている数字の配列(availableNumbers)から、ランダムな「位置」を選ぶ
+    const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+    // その位置の数字を取り出す（spliceを使うと配列からも削除されるため重複しない）
+    const drawnNum = availableNumbers.splice(randomIndex, 1)[0];
+    return drawnNum;
+}
+
+// ==========================================
+// 実行関数
+// ==========================================
+
+// ボタンクリック時のメイン処理
+function handleButtonClick() {
+    // 全部の数字が出終わった場合
+    if (availableNumbers.length === 0) {
+        alert("すべての番号が出ました。リセット（画面更新）してください。");
+        return;
+    }
+
+    if (!isSpinning) {
+        // --- SPIN開始の処理 ---
+        isSpinning = true;
+        button.textContent = "STOP";
+
+        // 音楽再生（最初から）
+        soundStop.pause();
+        soundStop.currentTime = 0;
+        soundSlot.play();
+
+        startSpin();
+    } else {
+        // --- STOP時の処理 ---
+        isSpinning = false;
+        button.textContent = "SPIN";
+
+        // 抽選して数字を確定し、スピンを止める
+        const hitNum = drawNumber();
+        stopSpin();
+        panel.textContent = hitNum;
+
+        // 履歴パネルの色を変更（直接スタイルを変えるのではなく、classを付与する）
+        const cell = document.getElementById(`cell-${hitNum}`);
+        cell.classList.add("active");
+
+        // 音楽再生（最初から）
+        soundSlot.pause();
+        soundSlot.currentTime = 0;
+        soundStop.play();
+    }
+}
+
+// ページ読み込み時に初期化処理(init)を実行
+window.onload = init;
+</file>
+
+<file path="bingo/style.css">
+/*
+    ============================================================
+    全体
+    ============================================================
+*/
+
+* {
+    box-sizing: border-box; /* 要素の幅計算を扱いやすくする */
+    font-family: sans-serif;
+    font-weight: bold;
+}
+
+body {
+    background-color: #fff7cc;
+    color: #ff5500;
+    margin: 0;
+    /* 全体を中央寄せするFlexbox */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 5vh;
+}
+
+/*
+    ============================================================
+    当選番号パネル
+    ============================================================
+*/
+
+.panel {
+    width: 240px;
+    background-color: white;
+    border: 3px solid #ff5500;
+    text-align: center;
+    font-size: 140px;
+    padding: 20px 0;
+    margin-bottom: 30px;
+}
+
+/*
+    ============================================================
+    ボタン
+    ============================================================
+*/
+
+.button {
+    width: 140px;
+    height: 45px;
+    font-size: 18px;
+    color: #ff5500;
+    background-color: white;
+    border: 2px solid #ff5500;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 50px;
+    transition: background-color 0.2s;
+}
+
+/* ホバー時 */
+.button:hover {
+    background-color: #ffe6d9;
+}
+
+/* フォーカス時 */
+.button:focus {
+    outline: none; /* デフォルトのフォーカスリングを削除 */
+    border: 3px solid #ff5500;
+}
+
+/*
+    ============================================================
+    履歴パネル (CSS Grid)
+    ============================================================
+*/
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr); /* 10列のグリッドを作る */
+    width: 100%;
+    max-width: 600px;
+    /* 格子の外枠（上と左） */
+    border-top: 1px solid #aaa;
+    border-left: 1px solid #aaa;
+}
+
+.cell {
+    background-color: white;
+    color: #aaa; /* 未当選はグレー */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 0;
+    font-size: 16px;
+    transition: all 0.2s; /* 色が変わるときのアニメーション */
+    /* 各マスの右と下にだけ線を引くことで、ボーダーの重複を防ぐ */
+    border-right: 1px solid #aaa;
+    border-bottom: 1px solid #aaa;
+}
+
+/* 当選済みのスタイル（JSで .active が付与されたときに適用） */
+.cell.active {
+    background-color: #66ffff;
+    color: #ff5500;
+}
+</file>
+
+<file path="bingo/index.html">
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ビンゴ抽選機</title>
+        <!-- 外部スタイルシート参照 -->
+        <link href="style.css" rel="stylesheet" type="text/css" />
+    </head>
+    <body>
+        <!-- 効果音 -->
+        <audio src="slot.mp3" id="slot" loop></audio>
+        <audio src="stop.mp3" id="stop"></audio>
+
+        <!-- 当選パネル -->
+        <div class="panel" id="panel">0</div>
+
+        <!-- ボタン (SPIN/STOP) -->
+        <button class="button" id="button">SPIN</button>
+
+        <!-- パネル (1〜75) -->
+        <div id="board" class="board"></div>
+
+        <!-- スクリプト -->
+        <script src="script.js"></script>
+    </body>
+</html>
+</file>
+
+<file path="README.md">
+# ビンゴ抽選機
+
+学生団体のイベントで使えるシンプルなビンゴ抽選アプリです。  
+1〜75の数字をランダムに1つずつ抽選し、当選済みの番号を画面下部のパネルで管理できます。
+
+<img width="3600" height="2078" alt="Image" src="https://github.com/user-attachments/assets/ef8c8e93-f478-4509-8153-549bb22eb507" />
+
+## 使い方
+
+### 1. ダウンロード
+
+画面右上の緑色の「Code」ボタン → 「Download ZIP」をクリックして、ZIPファイルをダウンロードしてください。  
+ダウンロードしたZIPファイルを解凍します。
+
+### 2. 起動
+
+解凍したフォルダの中にある `bingo` フォルダを開き、`index.html` をダブルクリックしてブラウザで開いてください。
+
+> **動作確認済みブラウザ:** Google Chrome / Microsoft Edge / Safari
+
+### 3. 操作方法
+
+| 操作 | 内容 |
+|------|------|
+| `SPIN` ボタンを押す | 数字がランダムに高速で表示されます |
+| `STOP` ボタンを押す | 数字が確定し、当選番号として表示されます |
+
+- 当選した番号は画面下部のパネルに水色でハイライトされます。
+- 1〜75の全番号を抽選し終えると、リセットを促すメッセージが表示されます。
+
+### 4. リセット方法
+
+ページをリロード（F5キー、またはブラウザの更新ボタン）すると最初の状態に戻ります。
+
+---
+
+## 注意事項
+
+- インターネット接続は不要です。
+- ページをリロードすると、それまでの抽選履歴はすべてリセットされます。
+- 音が出ます。会場の環境に応じて、PCの音量を調整してください。
+</file>
+
+</files>

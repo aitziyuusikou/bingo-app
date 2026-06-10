@@ -1,135 +1,125 @@
+// 設定値の定義
+const MAX_NUM = 75;
+let availableNumbers = []; // まだ出ていない数字を管理する配列
+let isSpinning = false; // スピン中かどうかのフラグ
+let loopTimer; // setInterval保管用
 
-// 数字がダブってないか確認する関数 -------------------------------------------------------------
-function check(rand) {
-    for (let i=0; i<num.length; i++) {
-        // 一回でも数字がダブってた場合
-        if (rand == num[i]) {
-            return false;
-        }
+// DOM要素の取得
+const panel = document.getElementById("panel");
+const button = document.getElementById("button");
+const board = document.getElementById("board");
+const soundSlot = document.getElementById("slot");
+const soundStop = document.getElementById("stop");
+
+// ==========================================
+// 初期化関数
+// ==========================================
+
+function init() {
+    // 1. まだ出ていない数字(1〜75)の配列を作成する
+    for (let i = 1; i <= MAX_NUM; i++) {
+        availableNumbers.push(i);
     }
-    // 一回も数字がダブっていない場合
-    return true;
+
+    // 2. 履歴パネルをJavaScriptで動的に生成する
+    for (let i = 1; i <= MAX_NUM; i++) {
+        const cell = document.createElement("div"); // <div>を作成
+        cell.classList.add("cell"); // class="cell" を付与
+        cell.id = `cell-${i}`; // id="cell-1" などを付与
+        cell.textContent = i; // テキストを挿入
+        board.appendChild(cell); // 画面(board)に追加
+    }
+
+    // 3. ボタンのクリックイベントを登録
+    button.addEventListener("click", handleButtonClick);
 }
 
+// ==========================================
+// ページ離脱防止
+// ==========================================
 
+window.addEventListener("beforeunload", (event) => {
+    // まだ抽選履歴が残っている場合のみ警告アラートが出現
+    if (availableNumbers.length < MAX_NUM) {
+        event.preventDefault();
 
-// ランダムに数字を取得する関数 -------------------------------------------------------------
+        // Chrome等で必要
+        event.returnValue = "";
 
-let count = 0; // 試行回数
-let num = new Array(); // ヒットした数字を格納する配列
+        return "";
+    }
+});
 
-// 数字がダブってないか確認する関数"check(rand)"も使用
+// ==========================================
+// 内部関数
+// ==========================================
 
-function hit() {
-    // 初めて試行する場合
-    if (count == 0) {
-        // 乱数を格納
-        num.push( Math.floor( Math.random() * (maxnum+1 - 1) ) + 1 );
-        // 試行回数カウントアップ
-        count++;
-        
-    // 2回目以降に試行する場合
+// スピン開始処理
+function startSpin() {
+    loopTimer = setInterval(() => {
+        // スピン中のダミー数字を表示（1〜75のランダム）
+        const dummyNum = Math.floor(Math.random() * MAX_NUM) + 1;
+        panel.textContent = dummyNum;
+    }, 50); // 少し間隔を広げる（画面のチラつきを軽減）
+}
+
+// スピン停止処理
+function stopSpin() {
+    clearInterval(loopTimer);
+}
+
+// 抽選処理
+function drawNumber() {
+    // 残っている数字の配列(availableNumbers)から、ランダムな「位置」を選ぶ
+    const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+    // その位置の数字を取り出す（spliceを使うと配列からも削除されるため重複しない）
+    const drawnNum = availableNumbers.splice(randomIndex, 1)[0];
+    return drawnNum;
+}
+
+// ==========================================
+// 実行関数
+// ==========================================
+
+// ボタンクリック時のメイン処理
+function handleButtonClick() {
+    // 全部の数字が出終わった場合
+    if (availableNumbers.length === 0) {
+        alert("すべての番号が出ました。リセット（画面更新）してください。");
+        return;
+    }
+
+    if (!isSpinning) {
+        // --- SPIN開始の処理 ---
+        isSpinning = true;
+        button.textContent = "STOP";
+
+        // 音楽再生（最初から）
+        soundStop.pause();
+        soundStop.currentTime = 0;
+        soundSlot.play();
+
+        startSpin();
     } else {
-        // 乱数を取得
-        let rand = Math.floor( Math.random() * (maxnum+1 - 1) ) + 1;
-        
-        // 乱数がダブってた場合
-        while( !check(rand) ){
-            // 乱数を取得し直す
-            rand = Math.floor( Math.random() * (maxnum+1 - 1) ) + 1;
-        }
-        
-        // 乱数を格納
-        num.push(rand);
-        
-        // 試行回数カウントアップ
-        count++;
+        // --- STOP時の処理 ---
+        isSpinning = false;
+        button.textContent = "SPIN";
+
+        // 抽選して数字を確定し、スピンを止める
+        const hitNum = drawNumber();
+        stopSpin();
+        panel.textContent = hitNum;
+
+        // 履歴パネルの色を変更（直接スタイルを変えるのではなく、classを付与する）
+        const cell = document.getElementById(`cell-${hitNum}`);
+        cell.classList.add("active");
+
+        // 音楽再生（最初から）
+        soundSlot.pause();
+        soundSlot.currentTime = 0;
+        soundStop.play();
     }
 }
 
-
-
-
-// スピンさせる関数 -------------------------------------------------------------
-
-const panel = document.getElementById("panel");  // 当選パネル
-let loop;  //関数保管用
-
-// 高速で数字を出現させる
-function startloop(){
-    loop = setInterval(function(){
-        panel.textContent = Math.floor( Math.random() * (maxnum+1 - 1) ) + 1;
-    } , 10);
-}
-
-// スピンを停止
-function stoploop(){
-    clearInterval(loop);
-}
-
-
-
-// ボタンクリック時の処理 -------------------------------------------------------------
-
-const maxnum = 75; // ビンゴの中で一番大きい数字を格納する変数
-let spin = false; // スピン中かを判定するフラグ
-const button = document.getElementById("btn");
-const sound_slot = document.getElementById("slot");
-const sound_stop = document.getElementById("stop");
-
-// 自作関数"hit()", "startloop()", "stoptloop()", check(rand)"も使用
-
-function slot() {
-    // 試行回数がmaxnun(ビンゴの最大値)を超えていない場合
-    if (count < maxnum) {
-        // 今からスピンする場合
-        if (spin == false) {
-            // 音楽再生
-            sound_stop.pause();
-            sound_stop.currentTime = 0 ;  // 再生位置を0秒(=最初)にセットする
-            sound_slot.play();
-            
-            // ボタンのテキストを変更
-            button.textContent = "STOP";
-            
-            // スピンスタート
-            startloop();
-
-            // フラグを変更
-            spin = true;
-
-            
-        // 今からストップする場合(spin == trueの場合)
-        } else {
-            
-            // ランダムに数字を取得
-            hit();
-            
-            // スピンストップ
-            stoploop();
-            
-            // 当選パネルに数字を表示
-            panel.textContent = num[count-1];
-            
-            // パネルのCSSを変更
-            document.getElementById(num[count-1]).style.backgroundColor = "#66FFFF";
-            
-            // 音楽再生
-            sound_slot.pause();
-            sound_slot.currentTime = 0 ;  // 再生位置を0秒(=最初)にセットする
-            sound_stop.play();
-            
-            // ボタンのテキストを変更
-            button.textContent = "SPIN";
-            
-            // フラグを変更
-            spin = false;
-            console.log(num);
-        }
-    
-    // 試行回数がmaxnun(ビンゴの最大値)を超えた場合
-    } else {
-        // ダイアログボックスを表示
-        alert("リセットしてください。");
-    }
-}
+// ページ読み込み時に初期化処理(init)を実行
+window.onload = init;

@@ -1,79 +1,104 @@
-/* 全体
---------------------------------------------------*/
+/*
+    ============================================================
+    全体
+    ============================================================
+*/
+
 * {
+    box-sizing: border-box; /* 要素の幅計算を扱いやすくする */
     font-family: sans-serif;
-    color: #ff5500;
     font-weight: bold;
-    
 }
 
 body {
     background-color: #fff7cc;
+    color: #ff5500;
+    margin: 0;
+    /* 全体を中央寄せするFlexbox */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 5vh;
 }
 
+/*
+    ============================================================
+    当選番号パネル
+    ============================================================
+*/
 
-/* 当選パネル
---------------------------------------------------*/
 .panel {
     width: 240px;
     background-color: white;
-    border: #ff5500 3px solid; /*境界線を指定*/
-    
-    
-    position: absolute;
-    top: 10%;
-    left: 50%;
-    transform: translateY(-10%) translateX(-50%);
-    -webkit- transform: translateY(-10%) translateX(-50%);
-    
+    border: 3px solid #ff5500;
     text-align: center;
     font-size: 140px;
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding: 20px 0;
+    margin-bottom: 30px;
 }
 
-/* ボタン
---------------------------------------------------*/
-.btn {
-    width: 100px;
-    height: 30px;
+/*
+    ============================================================
+    ボタン
+    ============================================================
+*/
+
+.button {
+    width: 140px;
+    height: 45px;
+    font-size: 18px;
+    color: #ff5500;
     background-color: white;
-    
-    position: absolute;
-    top: 42%;
-    left: 50%;
-    transform: translateY(-42%) translateX(-50%);
-    -webkit- transform: translateY(-42%) translateX(-50%);
+    border: 2px solid #ff5500;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 50px;
+    transition: background-color 0.2s;
 }
 
-/* パネル
---------------------------------------------------*/
-.log {
-    position: absolute;
-    top: 85%;
-    left: 50%;
-    transform: translateY(-85%) translateX(-50%);
-    -webkit- transform: translateY(-85%) translateX(-50%);
+/* ホバー時 */
+.button:hover {
+    background-color: #ffe6d9;
 }
 
-.log ul {
-    display: table;
-    border-collapse:collapse; /*隣接する要素のborderを共有*/
-    width: 550px; /*幅を100%に*/
-    table-layout:fixed; /*中の要素の幅を均等に*/
-    margin: 0px;
+/* フォーカス時 */
+.button:focus {
+    outline: none; /* デフォルトのフォーカスリングを削除 */
+    border: 3px solid #ff5500;
 }
 
-.log ul li {
-    display: table-cell;
-    border:#aaa 1px solid; /*境界線を指定*/
-    text-align: center;
-    padding-top: 10px;
-    padding-bottom: 10px;
+/*
+    ============================================================
+    履歴パネル (CSS Grid)
+    ============================================================
+*/
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr); /* 10列のグリッドを作る */
+    width: 100%;
+    max-width: 600px;
+    /* 格子の外枠（上と左） */
+    border-top: 1px solid #aaa;
+    border-left: 1px solid #aaa;
+}
+
+.cell {
     background-color: white;
+    color: #aaa; /* 未当選はグレー */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 0;
+    font-size: 16px;
+    transition: all 0.2s; /* 色が変わるときのアニメーション */
+    /* 各マスの右と下にだけ線を引くことで、ボーダーの重複を防ぐ */
+    border-right: 1px solid #aaa;
+    border-bottom: 1px solid #aaa;
 }
 
-/*数字じゃないやつ*/
-.none {
-    color: #aaa;
+/* 当選済みのスタイル（JSで .active が付与されたときに適用） */
+.cell.active {
+    background-color: #66ffff;
+    color: #ff5500;
 }
